@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Write a Letter</title>
+  <meta name="description" content="Tell a stranger about something good. Anonymously.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;500&family=Homemade+Apple&family=Nothing+You+Could+Do&family=Patrick+Hand&family=Reenie+Beanie&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Donation banner (the same link is also in the other page) -->
+  <div class="donate-banner">
+    <p>If this made your day, consider <a href="https://ko-fi.com/jillianwaun" target="_blank" rel="noopener">donating</a> to help keep Dear Stranger running.</p>
+  </div>
+  <div id="demo-banner" class="demo-banner" hidden>Preview. Nothing you send here is saved.</div>
+
+  <nav class="topbar"><a href="index.html">Back to the letters</a></nav>
+
+  <div id="compose">
+    <header class="write-head">
+      <h1>Write to a stranger</h1>
+      <p>Tell someone you’ll never meet about something good. Small things count. Your name never appears.</p>
+    </header>
+
+    <form id="letter-form" class="desk" novalidate>
+      <div class="paper-col sheet-wrap">
+        <div id="paper" class="paper hand-caveat">
+          <p class="salutation" aria-hidden="true">Dear stranger,</p>
+          <label for="body" class="sr-only">Your letter</label>
+          <textarea id="body" name="body" maxlength="3000" required
+            placeholder="Today something good happened…"></textarea>
+          <p id="signoff-preview" class="signoff" aria-hidden="true">With love, a stranger</p>
+          <span id="counter" class="counter" aria-live="polite">0 / 3000</span>
+        </div>
+      </div>
+
+      <div class="side">
+        <fieldset>
+          <legend>Pick your pen</legend>
+          <div id="pens" class="pens"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Sign it</legend>
+          <div id="signoffs" class="signoffs hand-caveat"></div>
+        </fieldset>
+
+        <div class="envelope">
+          <label class="field-label" for="email">Your email</label>
+          <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+
+          <label class="check">
+            <input type="checkbox" name="notify_comments" checked>
+            <span>Email me when someone leaves a note on my letter</span>
+          </label>
+          <label class="check">
+            <input type="checkbox" name="marketing_opt_in">
+            <span>Send me occasional updates from Dear Stranger</span>
+          </label>
+
+          <p class="fine">Your email is never shown on the site. <a href="privacy.html">How we use it</a></p>
+
+          <input class="honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <button id="send" class="button seal" type="submit">Seal and send</button>
+          <p id="status" class="status" role="status"></p>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <section id="result" class="result" hidden></section>
+
+  <script type="module" src="write.js"></script>
+</body>
+</html>

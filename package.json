@@ -1,0 +1,8 @@
+{
+  "name": "dear-stranger",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Anonymous happy stories, written like love letters.",
+  "engines": { "node": ">=18" }
+}

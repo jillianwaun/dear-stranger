@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Letter Queue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat&family=Homemade+Apple&family=Nothing+You+Could+Do&family=Patrick+Hand&family=Reenie+Beanie&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="plain">
+    <a href="index.html">Back to the letters</a>
+    <h1>Letters waiting for you</h1>
+
+    <form id="login">
+      <p>Enter your admin password to see letters and notes that need a human look.</p>
+      <label for="pw" class="sr-only">Admin password</label>
+      <input id="pw" type="password" autocomplete="current-password" required>
+      <button class="button" type="submit">Open the queue</button>
+      <p id="login-status" class="status" role="status"></p>
+    </form>
+
+    <div id="queue" hidden>
+      <p><button id="export" class="button" type="button">Download subscriber list (CSV)</button></p>
+      <h2>Letters</h2>
+      <div id="stories"></div>
+      <h2>Notes</h2>
+      <div id="notes"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { escapeHtml } from './common.js';
+    let pw = sessionStorage.getItem('ds-admin') || '';
+
+    async function call(path, opts = {}) {
+      const res = await fetch(path, { ...opts, headers: { 'Content-Type': 'application/json', 'x-admin-password': pw } });
+      if (res.status === 401) throw new Error('Wrong password.');
+      if (!res.ok) throw new Error('Something went wrong. Try again.');
+      return res;
+    }
+
+    const item = (kind, x) => `
+      <div class="card" data-kind="${kind}" data-id="${x.id}">
+        <p class="body ${kind === 'story' ? 'hand-' + escapeHtml(x.font) : ''}" style="${kind === 'story' ? 'font-size:var(--hand-size)' : ''}">${escapeHtml(x.body)}</p>
+        ${x.signoff ? `<p class="why">Signed: ${escapeHtml(x.signoff)}</p>` : ''}
+        <p class="why">Why it was held: ${escapeHtml(x.mod_reason || 'No reason given')}</p>
+        <div class="row">
+          <button class="button seal" data-action="publish">Publish</button>
+          <button class="button ghost" data-action="decline">Decline</button>
+        </div>
+      </div>`;
+
+    async function load() {
+      const data = await (await call('/api/admin')).json();
+      document.getElementById('stories').innerHTML = data.stories.length ? data.stories.map((s) => item('story', s)).join('') : '<p><em>No letters waiting.</em></p>';
+      document.getElementById('notes').innerHTML = data.notes.length ? data.notes.map((n) => item('note', n)).join('') : '<p><em>No notes waiting.</em></p>';
+      document.getElementById('login').hidden = true;
+      document.getElementById('queue').hidden = false;
+    }
+
+    document.getElementById('login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      pw = document.getElementById('pw').value;
+      try { await load(); sessionStorage.setItem('ds-admin', pw); }
+      catch (err) { const s = document.getElementById('login-status'); s.className = 'status error'; s.textContent = err.message; }
+    });
+
+    document.getElementById('queue').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const card = btn.closest('.card');
+      btn.disabled = true;
+      try {
+        await call('/api/admin', { method: 'POST', body: JSON.stringify({ kind: card.dataset.kind, id: card.dataset.id, action: btn.dataset.action }) });
+        card.remove();
+      } catch (err) { btn.disabled = false; alert(err.message); }
+    });
+
+    document.getElementById('export').addEventListener('click', async () => {
+      const blob = await (await call('/api/admin?export=marketing')).blob();
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: 'dear-stranger-subscribers.csv' });
+      a.click();
+    });
+
+    if (pw) load().catch(() => sessionStorage.removeItem('ds-admin'));
+  </script>
+</body>
+</html>
