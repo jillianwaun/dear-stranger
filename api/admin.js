@@ -1,5 +1,5 @@
 // Admin queue. Every request needs the x-admin-password header.
-// GET  /api/admin                 → held letters and notes
+// GET  /api/admin                 → held letters and notes, plus the 50 most recent letters
 // GET  /api/admin?export=marketing → CSV of emails that opted in to updates
 // POST /api/admin { kind, id, action: 'publish' | 'decline' }
 
@@ -34,7 +34,12 @@ export default async function handler(req, res) {
         status: 'eq.held',
         order: 'created_at.asc',
       });
-      return res.status(200).json({ stories, notes });
+      // Everything sent recently, whatever happened to it, so nothing is invisible.
+      const recent = await select('stories', 'id,body,status,mod_reason,created_at', {
+        order: 'created_at.desc',
+        limit: '50',
+      });
+      return res.status(200).json({ stories, notes, recent });
     }
 
     if (req.method === 'POST') {
