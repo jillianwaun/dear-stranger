@@ -65,7 +65,7 @@ form.addEventListener('submit', async (e) => {
     email: String(data.get('email') || '').trim(),
     notify_comments: data.get('notify_comments') === 'on',
     marketing_opt_in: data.get('marketing_opt_in') === 'on',
-    website: data.get('website'),
+    trap: data.get('ds_trap_7q'),
   };
 
   status.className = 'status';

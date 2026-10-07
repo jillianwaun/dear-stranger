@@ -134,7 +134,7 @@ noteForm.addEventListener('submit', async (e) => {
     } else {
       result = await api('/api/comment', {
         method: 'POST',
-        body: JSON.stringify({ story_id: current.id, body, website: noteForm.website.value }),
+        body: JSON.stringify({ story_id: current.id, body, trap: noteForm.ds_trap_7q.value }),
       });
     }
     noteBody.value = '';
