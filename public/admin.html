@@ -29,6 +29,9 @@
       <div id="stories"></div>
       <h2>Notes</h2>
       <div id="notes"></div>
+      <h2>Recent letters</h2>
+      <p>Every letter sent in the last while, including ones Claude published or declined on its own.</p>
+      <div id="recent"></div>
     </div>
   </main>
 
@@ -58,6 +61,16 @@
       const data = await (await call('/api/admin')).json();
       document.getElementById('stories').innerHTML = data.stories.length ? data.stories.map((s) => item('story', s)).join('') : '<p><em>No letters waiting.</em></p>';
       document.getElementById('notes').innerHTML = data.notes.length ? data.notes.map((n) => item('note', n)).join('') : '<p><em>No notes waiting.</em></p>';
+      const label = { published: 'Published', declined: 'Declined', held: 'Waiting for you' };
+      document.getElementById('recent').innerHTML = (data.recent || []).length ? data.recent.map((s) => `
+        <div class="card" data-kind="story" data-id="${s.id}">
+          <p class="why"><strong>${label[s.status] || s.status}</strong> · ${new Date(s.created_at).toLocaleString()}</p>
+          <p class="body">${escapeHtml(s.body)}</p>
+          <p class="why">Reason: ${escapeHtml(s.mod_reason || '')}</p>
+          <div class="row">${s.status === 'published'
+            ? '<button class="button ghost" data-action="decline">Take down</button>'
+            : '<button class="button seal" data-action="publish">Publish</button>'}</div>
+        </div>`).join('') : '<p><em>No letters yet.</em></p>';
       document.getElementById('login').hidden = true;
       document.getElementById('queue').hidden = false;
     }
@@ -76,7 +89,7 @@
       btn.disabled = true;
       try {
         await call('/api/admin', { method: 'POST', body: JSON.stringify({ kind: card.dataset.kind, id: card.dataset.id, action: btn.dataset.action }) });
-        card.remove();
+        load();
       } catch (err) { btn.disabled = false; alert(err.message); }
     });
 
