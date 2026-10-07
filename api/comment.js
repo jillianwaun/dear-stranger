@@ -12,8 +12,8 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST.' });
 
   try {
-    const { story_id, body, website } = req.body || {};
-    if (website) return res.status(200).json({ status: 'held' });
+    const { story_id, body, trap } = req.body || {};
+    if (trap) { console.warn('Spam trap filled, note discarded'); return res.status(200).json({ status: 'held' }); }
     if (!isUuid(story_id)) return res.status(400).json({ error: 'That letter could not be found.' });
 
     const ruleProblem = checkRules(body, 'comment');

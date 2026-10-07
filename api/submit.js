@@ -12,10 +12,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Use POST.' });
 
   try {
-    const { body, font, signoff, email, notify_comments, marketing_opt_in, website } = req.body || {};
+    const { body, font, signoff, email, notify_comments, marketing_opt_in, trap } = req.body || {};
 
     // Honeypot: a hidden field real people never fill in.
-    if (website) return res.status(200).json({ status: 'held' });
+    if (trap) { console.warn('Spam trap filled, letter discarded'); return res.status(200).json({ status: 'held' }); }
 
     if (!isEmail(email)) return res.status(400).json({ error: 'Add an email address so we can tell you when someone writes back.' });
 
